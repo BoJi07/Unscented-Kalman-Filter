@@ -33,13 +33,13 @@ class UKF {
    * Updates the state and the state covariance matrix using a laser measurement
    * @param meas_package The measurement at k+1
    */
-  void UpdateLidar(MeasurementPackage meas_package);
+  void UpdateLidar(Eigen::VectorXd &measurement);
 
   /**
    * Updates the state and the state covariance matrix using a radar measurement
    * @param meas_package The measurement at k+1
    */
-  void UpdateRadar(MeasurementPackage meas_package);
+  void UpdateRadar(Eigen::VectorXd &measurement);
 
 
   // initially set to false, set to true in first call of ProcessMeasurement
@@ -54,12 +54,19 @@ class UKF {
   // state vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad
   Eigen::VectorXd x_;
 
+  // augmented state vector
+  Eigen::VectorXd x_aug_;
+
   // state covariance matrix
   Eigen::MatrixXd P_;
+
+  //state covariance matrix
+  Eigen::MatrixXd P_aug_;
 
   // predicted sigma points matrix
   Eigen::MatrixXd Xsig_pred_;
 
+  
   // time when the state is true, in us
   long long time_us_;
 
@@ -95,6 +102,17 @@ class UKF {
 
   // Sigma point spreading parameter
   double lambda_;
+
+  // last timestamp
+  int64_t previous_timestamp_;
+
+  double NIS_radar_;
+  double NIS_ladar_;
+
+private:
+  void AugumentSigmaPoints(Eigen::MatrixXd &Xsig_points);
+  void SigmaPointPrediction(Eigen::MatrixXd &Xsig_aug, double dt);
+  void PredictMeanAndCovariance();
 };
 
 #endif  // UKF_H
